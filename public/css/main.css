@@ -1,0 +1,84 @@
+html {
+    font-size: 90%;
+    line-height: 1.8;
+}
+body {
+    margin: 0;
+    padding: 0;
+    font-size: 1rem;
+}
+a:link {
+    text-decoration: none;
+}
+input[type=text],
+input[type=email],
+input[type=password],
+textarea {
+    width: 360px;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #cacaca;
+}
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+header {
+    background: #fafafa;
+}
+header .container {
+    display: flex;
+    justify-content: space-between;
+}
+header .brand {
+    display: block;
+    font-size: 1.3rem;
+}
+
+.navigation {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.navigation li {
+    padding: 0 10px;
+}
+
+table.table {
+    border-collapse: collapse;
+}
+table.table thead {
+    background: #f1f1f1;
+    font-weight: bold;
+}
+table.table th,
+table.table td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+dt {
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: .9rem;
+}
+dd {
+    margin-bottom: 15px;
+}
+svg.w-5.h-5 {
+    width: 25px;
+    vertical-align: middle;
+}
+
+ul.message-list {
+    padding-left: 0;
+    list-style: none;
+}
+ul.message-list li {
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ddd;
+}
