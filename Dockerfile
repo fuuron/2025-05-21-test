@@ -1,32 +1,47 @@
+# PHP 8.2 をベースとした公式イメージ（Apache付き）
 FROM php:8.2.12-apache
 
-# 必要なツールと PHP 拡張をインストール
+# 必要なパッケージをインストール
 RUN apt-get update && apt-get install -y \
-  zip unzip git \
-  && docker-php-ext-install -j"$(nproc)" opcache pdo pdo_mysql \
-  && docker-php-ext-enable opcache
+    git \
+    unzip \
+    zip \
+    libzip-dev \
+    libonig-dev \
+    libxml2-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libicu-dev \
+    libpq-dev \
+    && docker-php-ext-install pdo pdo_mysql zip intl gd
 
-# Apache Rewrite モジュールを有効化
+# Composerのインストール
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# ApacheのドキュメントルートをLaravelのpublicディレクトリに設定
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+
+# Apacheの設定を変更
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
+    && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}/../!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# mod_rewrite 有効化
 RUN a2enmod rewrite
 
-# ポートとドキュメントルートの変更
-RUN sed -i 's/80/8080/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf
-RUN sed -i 's#/var/www/html#/var/www/html/public#g' /etc/apache2/sites-available/000-default.conf
-RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+# Laravel アプリケーションのコピー
+COPY . /var/www/html
 
-# Composer を追加
-COPY --from=composer:2.0 /usr/bin/composer /usr/bin/composer
+# パーミッション設定
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# アプリケーションのコピーとセットアップ
+# Composer install（本番用依存のみ）
 WORKDIR /var/www/html
-COPY . ./
+RUN composer install --no-dev --optimize-autoloader
 
-# Laravel セットアップ
-RUN composer install --no-dev --optimize-autoloader \
-  && php artisan config:cache \
-  && php artisan route:cache \
-  && php artisan view:cache \
-  && php artisan storage:link
+# ポート 80 を公開
+EXPOSE 80
 
-# パーミッション修正
-RUN chown -Rf www-data:www-data ./
+# Laravel アプリケーション起動
+CMD ["apache2-foreground"]
